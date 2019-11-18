@@ -1,6 +1,8 @@
 <template>
   <div class="camera-container">
-    <img src="@/assets/cancel.svg" alt="取消" @click="hideCapture" style="position: absolute;z-index: 109;margin-left: 5vw;margin-top: 2vh;border: 2px solid #dddddd;border-radius: 5px;padding: 6px" />
+    <a class="back-img" @click="hideCapture" style="position: absolute;z-index: 109;margin-left: 5vw;margin-top: 2vh;border: 2px solid #409eff;color: #409eff;border-radius: 5px;padding: 6px">
+      `返回`
+    </a>
     <svg class="svg">
       <defs>
         <mask id="myMask">
@@ -9,14 +11,14 @@
         </mask>
       </defs>
       <rect x="0" y="0" width="100vw" height="100vh"
-            style="stroke: none; fill: rgba(0, 0, 0, .8); mask: url(#myMask);"></rect>
+            style="stroke: none; fill: rgba(255, 255, 255, 0.9); mask: url(#myMask);"></rect>
     </svg>
     <video id="video" ref="video" autoplay playsinline></video>
     <canvas id="cav" ref="cav"></canvas>
 
     <div class="camera-actions">
       <button class="print-screen active print1" @click="confirmShoot">{{ shot ? '确认并上传' : '点击拍摄' }}</button>
-      <button v-show="shot" @click="cancelShot" class="print-screen">取消截图</button>
+      <button v-show="shot"  @click="cancelShot" class="print-screen">取消截图</button>
     </div>
   </div>
 </template>
@@ -27,7 +29,7 @@ export default {
   props: {
     mode: {
       type: [Boolean, String],
-      default: 'user'
+      default: 'environment'
     }
   },
   mounted () {
@@ -39,24 +41,42 @@ export default {
   }),
   methods: {
     confirmShoot () {
+      const canvas = this.$refs.cav
+
       if (this.shot) {
-        this.$emit('hideCapture', 'value')
+        this.$emit('hideCapture', canvas.toDataURL())
         return
       }
       this.shot = true
-      const canvas = this.$refs.cav
       const video = document.querySelector('video')
 
       const ctx = canvas.getContext('2d')
       const aspect = window.innerWidth / window.innerHeight
-      const tmpWidth = video.videoHeight * aspect
-      const x = (video.videoWidth - tmpWidth) / 2 + tmpWidth * 0.2
-      const y = video.videoHeight * 0.25
-      ctx.drawImage(video, x, y, tmpWidth * 0.6, tmpWidth * 0.6, 0, 0, canvas.width, canvas.height)
-      console.log(canvas.toDataURL())
+
+      let x = 0; let y = 0; let dx = 0; let dy = 0
+
+      if (window.innerWidth < window.innerHeight) {
+        let tmpWidth = video.videoHeight * aspect
+        x = (video.videoWidth - tmpWidth) / 2 + tmpWidth * 0.1
+        y = video.videoHeight * 0.15
+        dx = tmpWidth * 0.8
+        dy = video.videoHeight * 0.3
+      } else {
+        let tmp = video.videoWidth / aspect
+        x = video.videoWidth * 0.15
+        y = (video.videoHeight - tmp) / 2 + 0
+        dx = video.videoWidth * 0.7
+        dy = tmp * 1
+      }
+
+      ctx.drawImage(video, x, y, dx, dy, 0, 0, canvas.width, canvas.height)
+      console.log()
     },
     cancelShot () {
       this.shot = false
+      const canvas = this.$refs.cav
+      const ctx = canvas.getContext('2d')
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
     },
     showCapture () {
       this.show = true
@@ -99,7 +119,7 @@ export default {
         }
         video.play()
       }).catch(err => {
-        alert(err)
+        alert(err.name + ': 您的浏览器不支持启用摄像头，请更换浏览器')
       })
     }
   }
@@ -112,7 +132,19 @@ export default {
     min-height: 100vh;
     min-width: 100vw;
     overflow: hidden;
+    z-index:100;
     animation: fadeIn .4s forwards;
+    background-color: rgba(255,255,255,0.8);
+  }
+  @keyframes fadeOut {
+
+    100% {
+      transform: translateY(0);
+    }
+    0% {
+      transform: translateY(100%);
+    }
+
   }
 
   @keyframes fadeIn {
@@ -122,12 +154,6 @@ export default {
     100% {
       transform: translateY(0);
     }
-  }
-  .camera-container #cav {
-    position: absolute;
-    z-index: 1000;
-    width: 100%;
-    height: 100%;
   }
 
   .svg {
@@ -145,7 +171,7 @@ export default {
   }
 
   .print-screen {
-    z-index: 120;
+    z-index: 121;
     display: inline-block;
     line-height: 1;
     white-space: nowrap;
@@ -184,34 +210,36 @@ export default {
       transform: translateY(-50%);
       overflow: hidden;
     }
+    .camera-container #cav {
+      position: absolute;
+      z-index: 200;
+    }
+    .back-img {
 
-    .mask-rect {
-      transform: translate(15%, 15%);
-      width: 70%;
-      height: 70%;
+    }
+
+    .mask-rect,.camera-container #cav {
+      transform: translate(15vw);
+      width: 70vw;
+      height: 100vh;
     }
 
     .camera-actions{
-      top: 0;
-      bottom: 0;
+      margin-top: 45vh;
     }
     .print-screen{
       width: 5vw;
       margin-right: 10vw;
       margin-left: 90vw;
     }
-    .print1{
-      margin-top: 45vh;
-    }
   }
 
   @media screen and (orientation: portrait) {
     .camera-container #video {
-      position: relative;
+      position: absolute;
       height: 100vh;
-      /*height: 100vh;*/
-      /*left: 50%;*/
-      /*transform: translateX(-50%);*/
+      left: 50%;
+      transform: translateX(-50%);
     }
 
     .print-screen {
@@ -221,7 +249,16 @@ export default {
       margin: 1vh auto;
     }
 
-    .mask-rect {
+    .camera-actions{
+      margin-top: 50vh;
+    }
+
+    .camera-container #cav {
+      position: absolute;
+      z-index: 200;
+    }
+
+    .mask-rect,.camera-container #cav {
       transform: translate(10vw,15vh);
       width: 80vw;
       height: 30vh;

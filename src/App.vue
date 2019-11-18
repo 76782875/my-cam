@@ -1,8 +1,8 @@
 <template>
   <div id="app">
     <button style="position: absolute;margin-top: 50vh" @click="showCapture">拍摄</button>
-    <input type="file" accept="image/*" >
     <camera-capture v-if="show" ref="capture" @hideCapture="hideCapture" />
+    <img :src="imgSrc" alt="图片" style="position: absolute;top: 30vh" />
   </div>
 </template>
 
@@ -14,7 +14,8 @@ export default {
   name: 'app',
   components: { CameraCapture },
   data: () => ({
-    show: false
+    show: false,
+    imgSrc: ''
   }),
   methods: {
     showCapture () {
@@ -22,7 +23,7 @@ export default {
     },
     hideCapture (val) {
       this.show = false
-      console.log(val)
+      this.imgSrc = val
     }
   }
 
