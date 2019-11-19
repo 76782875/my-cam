@@ -1,7 +1,7 @@
 <template>
   <div class="camera-container">
-    <a class="back-img" @click="hideCapture" style="position: absolute;z-index: 109;margin-left: 5vw;margin-top: 2vh;border: 2px solid #409eff;color: #409eff;border-radius: 5px;padding: 6px">
-      `返回`
+    <a class="back-img" @click="hideCapture" style="position: absolute;z-index: 109;margin-left: 5vw;margin-top: 2vh;border: 1px solid white ;color: white;border-radius: 5px;padding: 6px">
+      返回
     </a>
     <svg class="svg">
       <defs>
@@ -11,13 +11,14 @@
         </mask>
       </defs>
       <rect x="0" y="0" width="100vw" height="100vh"
-            style="stroke: none; fill: rgba(255, 255, 255, 0.9); mask: url(#myMask);"></rect>
+            style="stroke: none; fill: rgba(255, 255, 255, 1); mask: url(#myMask);"></rect>
     </svg>
     <video id="video" ref="video" autoplay playsinline></video>
     <canvas id="cav" ref="cav"></canvas>
 
     <div class="camera-actions">
-      <button class="print-screen active print1" @click="confirmShoot">{{ shot ? '确认并上传' : '点击拍摄' }}</button>
+      <button class="print-screen active print1" @click="confirmShoot">
+        <span>{{ shot ? '确认并上传' : '点击拍摄'}}</span></button>
       <button v-show="shot"  @click="cancelShot" class="print-screen">取消截图</button>
     </div>
   </div>
@@ -32,12 +33,18 @@ export default {
       default: 'environment'
     }
   },
+  created () {
+  },
   mounted () {
     this.initCamera()
+    const m = 9
+    this.$refs.cav.width = this.$refs.cav.clientWidth * m
+    this.$refs.cav.height = this.$refs.cav.clientHeight * m
   },
   data: () => ({
     show: false,
-    shot: false
+    shot: false,
+    da: ''
   }),
   methods: {
     confirmShoot () {
@@ -48,19 +55,20 @@ export default {
         return
       }
       this.shot = true
-      const video = document.querySelector('video')
+      const video = document.querySelector('#video')
 
       const ctx = canvas.getContext('2d')
-      const aspect = window.innerWidth / window.innerHeight
-
+      const aspect = video.clientWidth / video.clientHeight
+      // const cavAspect = canvas.clientHeight / canvas.clientWidth
       let x = 0; let y = 0; let dx = 0; let dy = 0
 
       if (window.innerWidth < window.innerHeight) {
         let tmpWidth = video.videoHeight * aspect
         x = (video.videoWidth - tmpWidth) / 2 + tmpWidth * 0.1
         y = video.videoHeight * 0.15
-        dx = tmpWidth * 0.8
         dy = video.videoHeight * 0.3
+        dx = dy * canvas.width / canvas.height
+        // dy = dx * cavAspect
       } else {
         let tmp = video.videoWidth / aspect
         x = video.videoWidth * 0.15
@@ -70,7 +78,6 @@ export default {
       }
 
       ctx.drawImage(video, x, y, dx, dy, 0, 0, canvas.width, canvas.height)
-      console.log()
     },
     cancelShot () {
       this.shot = false
@@ -103,13 +110,15 @@ export default {
         }
       }
 
+      const width = 1280
+      const height = 720
+
       // 摄像头调用配置
       const mediaOpts = {
         audio: false,
-        video: { facingMode: this.mode && this.mode === 'environment' ? { exact: 'environment' } : 'user'
-        }// 或者 "user"
+        // video: { facingMode: 'user', width: width, height: width }// 或者 "user"
         // video: { width: 1280, height: 720 }
-        // video: { facingMode: { exact: 'environment' } }// 或者 "user"
+        video: { facingMode: { exact: 'environment' }, width: width, height: height }// 或者 "user"
       }
       navigator.mediaDevices.getUserMedia(mediaOpts).then(stream => {
         if ('srcObject' in video) {
@@ -119,7 +128,7 @@ export default {
         }
         video.play()
       }).catch(err => {
-        alert(err.name + ': 您的浏览器不支持启用摄像头，请更换浏览器')
+        alert(err.name + ': 您的浏览器不支持启用摄像头，请更换浏览器。' + err)
       })
     }
   }
@@ -237,9 +246,13 @@ export default {
   @media screen and (orientation: portrait) {
     .camera-container #video {
       position: absolute;
+      padding: 0;
+      margin: 0;
+      width: 100vw;
       height: 100vh;
       left: 50%;
-      transform: translateX(-50%);
+      top: 50%;
+      transform: translate(-50%,-50%);
     }
 
     .print-screen {

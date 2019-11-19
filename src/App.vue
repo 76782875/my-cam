@@ -1,8 +1,10 @@
 <template>
   <div id="app">
-    <button style="position: absolute;margin-top: 50vh" @click="showCapture">拍摄</button>
+<!--    <button @click="clickBtn">点我啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊</button>-->
+<!--    <input type="file" ref="inputa" accept="image/*" capture="camera" hidden />-->
+    <button style="position: absolute;margin: auto;width: 100%;display: block;bottom: 20%" @click="showCapture">拍摄</button>
     <camera-capture v-if="show" ref="capture" @hideCapture="hideCapture" />
-    <img :src="imgSrc" alt="图片" style="position: absolute;top: 30vh" />
+    <img :src="imgSrc" alt="图片" style="position: absolute;width: 100%;display: block;top: 30%;" />
   </div>
 </template>
 
@@ -18,6 +20,10 @@ export default {
     imgSrc: ''
   }),
   methods: {
+    clickBtn () {
+      console.log('clicked')
+      this.$refs.inputa.click()
+    },
     showCapture () {
       this.show = true
     },
