@@ -1,7 +1,7 @@
 <template>
   <div class="camera-container" ref="container">
     <a class="back-img" @click="hideCapture">
-      返 回
+      返回
     </a>
     <svg class="svg">
       <defs>

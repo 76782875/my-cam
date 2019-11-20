@@ -8,14 +8,12 @@
 
 <script>
 
-// import HelloWorld from './components/HelloWorld'
 import CameraCapture from './components/CameraCapture'
 
 export default {
   name: 'app',
   components: { CameraCapture },
   data: () => ({
-    show: false,
     imgSrc: ''
   }),
   methods: {
@@ -23,13 +21,10 @@ export default {
       this.$refs.capture.showModal()
     },
     onShot (val) {
-      this.show = false
       this.imgSrc = val
       console.log(val)
     }
   }
-
-  // components: { HelloWorld }
 }
 </script>
 
