@@ -85,7 +85,8 @@ export default {
   data: () => ({
     show: true,
     shot: false,
-    status: 'portrait'
+    status: 'portrait',
+    stream: undefined
   }),
   methods: {
     renderResize () {
@@ -97,13 +98,20 @@ export default {
         this.status = 'portrait'
       }
     },
+    stopStream () {
+      if (this.stream) {
+        this.stream.getTracks().forEach(track => {
+          track.stop()
+        })
+      }
+    },
     confirmShoot () {
       const canvas = this.$refs.cav
       if (!canvas) return
       const ctx = canvas.getContext('2d')
 
       if (this.shot) {
-        this.mediaStreamTrack && this.mediaStreamTrack.stop()
+        this.stopStream()
         // this.$emit('onConfirmShot', undefined)
         this.$refs.container.style.marginTop = '200vh'
         this.$refs.container.style.display = 'none'
@@ -162,7 +170,7 @@ export default {
       const canvas = this.$refs.cav
       const ctx = canvas.getContext('2d')
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-      this.mediaStreamTrack && this.mediaStreamTrack.stop()
+      this.stopStream()
       // this.$emit('onConfirmShot', undefined)
       this.$refs.container.style.marginTop = '200vh'
       this.$refs.container.style.display = 'none'
@@ -203,6 +211,7 @@ export default {
         } else {
           video.src = window.URL || window.URL.createObjectURL(stream) || stream
         }
+        this.stream = stream
         video.play()
       }).catch(err => {
         alert(err.name + ': 您的浏览器不支持启用摄像头，请更换浏览器。')
