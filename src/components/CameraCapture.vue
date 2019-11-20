@@ -89,15 +89,13 @@ export default {
     stream: undefined
   }),
   methods: {
+    // 判断横屏或者竖屏
     renderResize () {
       let width = document.documentElement.clientWidth
       let height = document.documentElement.clientHeight
-      if (width > height) {
-        this.status = 'landscape'
-      } else {
-        this.status = 'portrait'
-      }
+      this.status = width > height ? 'landscape' : 'portrait'
     },
+    // 关闭视频流
     stopStream () {
       if (this.stream) {
         this.stream.getTracks().forEach(track => {
@@ -105,6 +103,7 @@ export default {
         })
       }
     },
+    // 确定上传图片
     confirmShoot () {
       const canvas = this.$refs.cav
       if (!canvas) return
@@ -112,7 +111,6 @@ export default {
 
       if (this.shot) {
         this.stopStream()
-        // this.$emit('onConfirmShot', undefined)
         this.$refs.container.style.marginTop = '200vh'
         this.$refs.container.style.display = 'none'
 
@@ -131,7 +129,7 @@ export default {
       let y = 0
       let dx = 0
       let dy = 0
-
+      // 将video中的图像映射到canvas中
       if (window.innerWidth < window.innerHeight) {
         let tmpWidth = video.videoHeight * aspect
         x = (video.videoWidth - tmpWidth) / 2 + tmpWidth * 0.1
@@ -149,12 +147,14 @@ export default {
 
       ctx.drawImage(video, x, y, dx, dy, 0, 0, canvas.width, canvas.height)
     },
+    // 返回按钮
     cancelShot () {
       this.shot = false
       const canvas = this.$refs.cav
       const ctx = canvas.getContext('2d')
       ctx.clearRect(0, 0, canvas.width, canvas.height)
     },
+    // 显示并初始化整个弹窗
     showModal () {
       this.$refs.container.style.display = 'block'
       this.$refs.container.style.marginTop = '0'
@@ -166,6 +166,7 @@ export default {
       this.$refs.cav.height = this.$refs.cav.clientHeight * m
       window.addEventListener('resize', this.renderResize, false)
     },
+    // 隐藏弹窗
     hideCapture () {
       const canvas = this.$refs.cav
       const ctx = canvas.getContext('2d')
@@ -175,6 +176,7 @@ export default {
       this.$refs.container.style.marginTop = '200vh'
       this.$refs.container.style.display = 'none'
     },
+    // 初始化相机
     async initCamera () {
       this.shot = false
       const video = this.$refs.video
@@ -235,17 +237,6 @@ export default {
     animation: fadeIn .4s forwards;
     transition: margin-top 0.8s;
     background: white;
-  }
-
-  @keyframes fadeOut {
-
-    100% {
-      transform: translateY(0);
-    }
-    0% {
-      transform: translateY(100%);
-    }
-
   }
 
   @keyframes fadeIn {
